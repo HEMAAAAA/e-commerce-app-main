@@ -1,3 +1,6 @@
+# Linkedin
+https://www.linkedin.com/in/logeshvaranit/
+
 # E-commerce Platform with Docker Compose
 
 This project provides a fully containerized e-commerce platform using Docker Compose. It includes multiple microservices, each responsible for a specific part of the platform, such as user authentication, product management, order processing, and more.
@@ -98,12 +101,12 @@ This will stop and remove all containers, networks, and volumes defined in the `
     
 -   Click on **Launch Instance**.
     
--   Select **Ubuntu 22.04 LTS** as the AMI.
+-   Select **Ubuntu 24.04 LTS** as the AMI.
     
 
 ### **Step 2: Choose Instance Type**
 
--   Select **t2.micro** (Free Tier eligible) or a larger instance if needed.
+-   Select **t2.large** (Free Tier eligible) or a larger instance if needed.
     
 
 ### **Step 3: Configure Instance Details**
@@ -136,7 +139,7 @@ Create a security group with the following rules:
 | SSH        | 22         | Your IP   | Secure SSH access       |
 | HTTP       | 80         | 0.0.0.0/0 | Web server access       |
 | HTTPS      | 443        | 0.0.0.0/0 | Secure web traffic      |
-| Custom TCP | 4000  | 0.0.0.0/0 | Allow ecommerce-ui (UI of the app) service port|
+| Custom TCP | 4000  	  | 0.0.0.0/0 | Allow ecommerce-ui (UI of the app) service port|
 
 - Click **Launch**.
 - Select or create a new key pair to access the instance via SSH.
