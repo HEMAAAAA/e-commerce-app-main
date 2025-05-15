@@ -47,7 +47,7 @@ services:
     build: ./shipping-and-handling
     container_name: shipping-and-handling
     ports:
-      - "8080:8080" # Expose port 8080 for the shipping and handling microservice
+      - "8088:8088" # Expose port 8080 for the shipping and handling microservice
     depends_on:
       - mongodb-shipping # Depends on the MongoDB service
     environment:

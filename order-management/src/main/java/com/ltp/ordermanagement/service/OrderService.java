@@ -105,7 +105,7 @@ public class OrderService {
         List<CartItem> items = order.getItems();
         return items.stream()
                 .mapToDouble(item -> {
-                    Product product = restTemplate.getForObject(shippingHandlingApiHost + ":8080/shipping-fee?product_id=" + item.getProductId(), Product.class);
+                    Product product = restTemplate.getForObject(shippingHandlingApiHost + ":8088/shipping-fee?product_id=" + item.getProductId(), Product.class);
                     if (product != null) {
                         return product.getShippingFee();
                     } else {

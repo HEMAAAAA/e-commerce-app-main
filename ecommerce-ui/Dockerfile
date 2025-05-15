@@ -1,34 +1,50 @@
 # Use the official Node.js image as the base image
-FROM node:14
+ARG BASE_IMAGE=node:14-alpine
+FROM ${BASE_IMAGE} AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the server code to the working directory
-COPY server /app/server
+# ---------- Build server ----------
+# Copy server package files first (better caching)
+COPY server/package*.json ./server/
 
-# Change to the server directory
+# Install server dependencies
 WORKDIR /app/server
+RUN npm install --production
 
-# Install the server dependencies (only needed if you're not copying over the node_modules)
-RUN npm install
+# ---------- Build client ----------
+# Copy client package files first (better caching)
+WORKDIR /app
+COPY client/package*.json ./client/
 
-# Change back to the app directory
+# Install client dependencies
+WORKDIR /app/client
+RUN npm install --production
+
+# ---------- Copy source code ----------
+# Now copy the rest of the application code
+WORKDIR /app
+COPY server ./server
+COPY client ./client
+
+# ---------- Stage 2: Final Stage ----------
+FROM ${BASE_IMAGE} AS final
+
+# Create non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Set working directory
 WORKDIR /app
 
-# Copy the client code to the client directory
-COPY client /app/client
+# Copy only what's needed from builder stage
+COPY --from=builder --chown=appuser:appgroup /app/client /app/client
+COPY --from=builder --chown=appuser:appgroup /app/server /app/server
 
-# Change to the client directory
-WORKDIR /app/client
+# Set permissions
+USER appuser
 
-# Install the client dependencies (only needed if you're not copying over the node_modules)
-RUN npm install
-
-# Build the React application
-RUN npm run build
-
-# Change back to the server directory
+# Change to the server directory
 WORKDIR /app/server
 
 # Expose the port that the server listens on

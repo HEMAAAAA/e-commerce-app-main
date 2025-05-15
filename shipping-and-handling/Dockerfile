@@ -1,20 +1,45 @@
-# Use the official Golang image as the base image
-FROM golang:1.20
+# Build stage
+FROM golang:1.20-alpine AS builder
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy go.mod and go.sum if they exist
+# Copy go mod files
 COPY go.mod go.sum ./
 
-# Download any dependencies
+# Download dependencies
 RUN go mod download
 
-# Copy the rest of the source code
-COPY . .
+# Copy source code
+COPY main.go .
 
-# Expose the port that the API listens on
-EXPOSE 8080
+# Build the application with optimizations
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o shipping-service main.go
 
-# Run the code when the container starts. Consider using 'go build' and running the compiled binary for production.
-CMD ["go", "run", "main.go"]
+# Final stage
+FROM alpine:3.18
+
+# Add CA certificates for HTTPS
+RUN apk --no-cache add ca-certificates
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Set working directory
+WORKDIR /app
+
+# Copy binary from builder stage
+COPY --from=builder /app/shipping-service .
+
+# Use non-root user
+USER appuser
+
+# Expose API port
+EXPOSE 8088
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -qO- http://localhost:8088/shipping-explanation || exit 1
+
+# Run the binary
+CMD ["./shipping-service"]

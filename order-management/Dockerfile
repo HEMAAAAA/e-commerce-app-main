@@ -1,17 +1,27 @@
-# Use the official Maven runtime with JDK 17 as a base image
-FROM maven:3.6.3-openjdk-17-slim
+# Build stage
+FROM maven:3.6.3-openjdk-17-slim AS builder
 
-# Set the working directory inside the container
+# Set working directory
+WORKDIR /build
+
+# Copy pom.xml separately for better caching
+COPY pom.xml .
+COPY src ./src
+
+# Package the application
+RUN mvn clean package -DskipTests
+
+# Runtime stage - smaller JRE image
+FROM openjdk:17-slim
+
+# Set working directory
 WORKDIR /app
 
-# Copy the project files
-COPY . .
+# Copy JAR from builder stage
+COPY --from=builder /build/target/*.jar app.jar
 
-## 4 Install the dependencies listed inside of pom.xml 
-RUN mvn install
-
-# Expose the port that the application listens on
+# Expose application port
 EXPOSE 9090
 
-## 5. Define the command to run when the container starts.
-CMD ["mvn", "spring-boot:run"]
+# Run the application
+CMD ["java", "-jar", "app.jar"]

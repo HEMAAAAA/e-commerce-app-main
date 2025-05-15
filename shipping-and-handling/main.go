@@ -244,6 +244,6 @@ func main() {
     http.HandleFunc("/shipping-explanation", corsMiddleware(handleShippingExplanation))
     http.HandleFunc("/all-shipping-fees", corsMiddleware(handleAllShippingFees))
 
-    fmt.Println("Server is running on port 8080...")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    fmt.Println("Server is running on port 8088...")
+    log.Fatal(http.ListenAndServe(":8088", nil))
 }

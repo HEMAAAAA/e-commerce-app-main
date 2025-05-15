@@ -1,21 +1,43 @@
-# Use the official Node.js image as the base image
-FROM node:14
+# Build stage
+FROM node:14-alpine AS builder
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy package files for dependency installation
 COPY package*.json ./
 
-# Install the dependencies
-RUN npm install
+# Install dependencies with exact versions for production
+RUN npm install --production
 
-# Copy the rest of the application source code
+# Copy application code
 COPY . .
 
-# Expose the port that the microservice listens on
+# Runtime stage
+FROM node:14-alpine AS final
+
+# Create a non-root user
+RUN addgroup -S appgroup && \
+    adduser -S appuser -G appgroup
+
+# Set working directory
+WORKDIR /app
+
+# Copy node_modules and app files from builder
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/package.json ./package.json
+COPY --from=builder --chown=appuser:appgroup /app/index.js ./index.js
+COPY --from=builder --chown=appuser:appgroup /app/products.json ./products.json
+
+# Set proper permissions
+USER appuser
+
+# Expose the application port
 EXPOSE 3001
 
-# Run the Node.js application when the container starts
-CMD ["node", "index.js"]
+# Define healthcheck
+  CMD curl -f http://localhost:3001/health || exit 1
+  CMD wget -q -O - http://localhost:3001/health || exit 1
 
+# Run the application
+CMD ["node", "index.js"]
