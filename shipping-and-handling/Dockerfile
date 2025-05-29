@@ -5,7 +5,7 @@ FROM golang:1.20-alpine AS builder
 WORKDIR /app
 
 # Install git and other tools
-RUN apk update && apk add --no-cache git ca-certificates curl
+RUN apk update && apk add --no-cache git
 
 # Set Go environment (network-safe)
 ENV GOPROXY=https://proxy.golang.org,direct
