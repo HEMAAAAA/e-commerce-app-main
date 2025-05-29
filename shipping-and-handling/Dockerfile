@@ -5,13 +5,14 @@ FROM golang:1.20-alpine AS builder
 WORKDIR /app
 
 # Install git and other tools
-RUN apk update && apk add --no-cache git
+RUN apk update && apk add --no-cache git ca-certificates curl
+
+# Set Go environment (network-safe)
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GODEBUG=netdns=go,dns+ipv4only
 
 # Copy go mod files
 COPY go.mod go.sum ./
-
-ENV GOPROXY=direct
-ENV GODEBUG=netdns=go
 
 # Download dependencies
 RUN go mod download
