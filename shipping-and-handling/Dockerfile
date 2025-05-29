@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy go mod files
 COPY go.mod go.sum ./
 
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GODEBUG=netdns=go
+
 # Download dependencies
 RUN go mod download
 
